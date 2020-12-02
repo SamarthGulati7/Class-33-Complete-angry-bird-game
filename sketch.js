@@ -7,13 +7,21 @@ var engine, world;
 var box1, pig1,pig3;
 var backgroundImg,platform;
 var bird, slingshot;
+var bird1,bird2,bird3;
+var sound1,sound2,sound3;
 
 var gameState = "onSling";
 var bg = "sprites/bg1.png";
 var score = 0;
+var birds=[];
+
 
 function preload() {
-    getBackgroundImg();
+    backgroundImg= loadImage("sprites/bg.png");
+    sound1= loadSound("sounds/sounds/bird_flying.mp3");
+    sound2= loadSound("sounds/sounds/bird_select.mp3");
+    sound3= loadSound("sounds/sounds/pig_snort.mp3");
+    
 }
 
 function setup(){
@@ -41,9 +49,19 @@ function setup(){
     log5 = new Log(870,120,150, -PI/7);
 
     bird = new Bird(200,50);
+    bird1= new Bird(150,170);
+    bird2= new Bird(100,170);
+    bird3= new Bird(50,170);
+    
+    birds.push(bird3);
+    birds.push(bird2);
+    birds.push(bird1);
+    birds.push(bird);
 
     //log6 = new Log(230,180,80, PI/2);
     slingshot = new SlingShot(bird.body,{x:200, y:50});
+
+    getBackgroundImg();
 }
 
 function draw(){
@@ -75,26 +93,35 @@ function draw(){
     log5.display();
 
     bird.display();
+    bird1.display();
+    bird2.display();
+    bird3.display();
+
     platform.display();
     //log6.display();
     slingshot.display();    
 }
 
 function mouseDragged(){
-    //if (gameState!=="launched"){
-        Matter.Body.setPosition(bird.body, {x: mouseX , y: mouseY});
-    //}
+    if (gameState!=="launched"){
+        Matter.Body.setPosition(birds[birds.length-1].body, {x: mouseX , y: mouseY});
+    }
 }
 
 
 function mouseReleased(){
     slingshot.fly();
     gameState = "launched";
+    birds.pop();
+    sound1.play();
 }
 
 function keyPressed(){
-    if(keyCode === 32){
-       slingshot.attach(bird.body);
+    if(keyCode === 32 && bird.body.speed<3){
+       Matter.Body.setPosition(birds[birds.length-1].body,{x:200,y:50}); 
+       slingshot.attach(birds[birds.length-1].body);
+       gameState="onSling";
+       sound2.play();
     }
 }
 
@@ -105,7 +132,7 @@ async function getBackgroundImg(){
     var datetime = responseJSON.datetime;
     var hour = datetime.slice(11,13);
     
-    if(hour>=0600 && hour<=1900){
+    if(hour>=06&& hour<=19){
         bg = "sprites/bg1.png";
     }
     else{
